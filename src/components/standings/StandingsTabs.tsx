@@ -31,8 +31,8 @@ export function StandingsTabs({
                         aria-selected={tab === id}
                         onClick={() => setTab(id)}
                         className={`border-b-[3px] px-4 py-2.5 text-sm font-bold tracking-wide transition-colors ${tab === id
-                                ? "border-[#E10600] text-white"
-                                : "border-transparent text-[#9494A8] hover:text-white"
+                            ? "border-[#E10600] text-white"
+                            : "border-transparent text-[#9494A8] hover:text-white"
                             }`}
                     >
                         {label}
@@ -43,13 +43,13 @@ export function StandingsTabs({
             {tab === "drivers" ? (
                 <ol>
                     {drivers.map((s) => (
-                        <DriverRow key={s.Driver.driverId} standing={s} />
+                        <DriverRow key={s.Driver.driverId} standing={s} leaderPts={0} />
                     ))}
                 </ol>
             ) : (
                 <ol>
                     {constructors.map((s) => (
-                        <ConstructorRow key={s.Constructor.constructorId} standing={s} />
+                        <ConstructorRow key={s.Constructor.constructorId} standing={s} leaderPts={0} />
                     ))}
                 </ol>
             )}

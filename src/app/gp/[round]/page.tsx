@@ -14,7 +14,6 @@ import { flagUrl } from "@/lib/flags";
 import { SessionTabs } from "@/components/gp/SessionTabs";
 import type { SessionRow, RaceRow } from "@/components/gp/SessionTabs";
 import { PositionsChart, type PositionSeries, type StopMarker } from "@/components/gp/PositionsChart";
-import type { PitRow } from "@/components/gp/SessionTabs";
 import { SEASON } from "@/lib/config";
 import type { Metadata } from "next";
 import { ColorTab } from "@/components/ColorTab";

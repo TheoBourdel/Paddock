@@ -24,3 +24,22 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@keyframes pw-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.8); }
+}
+.pw-pulse {
+  animation: pw-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pw-spin {
+  to { transform: rotate(360deg); }
+}
+.pw-spin {
+  animation: pw-spin 0.7s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pw-pulse { animation: none; }
+}

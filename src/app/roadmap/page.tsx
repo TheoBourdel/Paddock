@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { getRoadmap } from "@/lib/roadmap";
 
 export const metadata: Metadata = { title: "Roadmap" };
+export const revalidate = 3600;
 
 // ——— Styles des badges ———
 const TAGS = {
@@ -10,86 +12,26 @@ const TAGS = {
     idea: { label: "Idée", color: "rgba(255,255,255,0.6)", bg: "rgba(255,255,255,0.08)" },
 } as const;
 
-type TagKey = keyof typeof TAGS;
-
-interface RoadmapItem {
-    tag: TagKey;
-    eta: string;
-    title: string;
-    desc: string;
-}
-
-// ——— La roadmap : à éditer ici, et uniquement ici ———
-const COLUMNS: { title: string; color: string; items: RoadmapItem[] }[] = [
+// ——— Colonnes : identité visuelle et échéance affichée ———
+const COLUMN_META = [
+    { id: "en-cours", title: "En cours", color: "#E10600", eta: "En cours" },
+    { id: "a-venir", title: "À venir", color: "#FFD23F", eta: "Prochainement" },
     {
-        title: "En cours",
-        color: "#E10600",
-        items: [
-            {
-                tag: "feature",
-                eta: "En cours",
-                title: "Section Palmares",
-                desc: "Historique des écruries et des pilotes, recherches, filtres.",
-            },
-            {
-                tag: "idea",
-                eta: "En cours",
-                title: "Ajout d'un lien 'buy me a coffe'",
-                desc: "Mettre un lien dans le footer pour me faire un don.",
-            },
-        ],
-    },
-    {
-        title: "À venir",
-        color: "#FFD23F",
-        items: [
-            {
-                tag: "feature",
-                eta: "Prochainement",
-                title: "Essais libres et Qualifications Sprint sur les pages GP",
-                desc: "Les deux sessions absentes de jolpica, débloquées par l'intégration OpenF1.",
-            },
-            {
-                tag: "fix",
-                eta: "Prochainement",
-                title: "Amélioration de la responsive",
-                desc: "Certaines pages sont encore trop brouillon sur mobile. Certaines infos seront supprimés, pour alléger la version mobile.",
-            },
-            {
-                tag: "perf",
-                eta: "Prochainement",
-                title: "Onglet des classements dans l'URL",
-                desc: "Conserver le segment Pilotes / Constructeurs au rechargement et au partage.",
-            },
-            {
-                tag: "feature",
-                eta: "Prochainement",
-                title: "Section Live",
-                desc: "Développement de la section live, débloquées par l'intégration OpenF1. Grosse feature",
-            },
-        ],
-    },
-    {
+        id: "explore",
         title: "Exploré",
         color: "rgba(255,255,255,0.4)",
-        items: [
-            {
-                tag: "idea",
-                eta: "Non planifié",
-                title: "Sélecteur de saison sur les classements",
-                desc: "Revoir n'importe quel championnat depuis 1950 — 2021 en tête.",
-            },
-            {
-                tag: "idea",
-                eta: "Non planifié",
-                title: "Stats de carrière enrichies",
-                desc: "Podiums et pole positions, via l'historique complet des résultats.",
-            },
-        ],
+        eta: "Non planifié",
     },
-];
+] as const;
 
-export default function RoadmapPage() {
+export default async function RoadmapPage() {
+    const entries = await getRoadmap();
+    const columns = COLUMN_META.map((meta) => ({
+        ...meta,
+        items: entries.filter((e) => e.column === meta.id),
+    }));
+    const empty = entries.length === 0;
+
     return (
         <main>
             <div className="mb-8 flex flex-col gap-1.5">
@@ -106,53 +48,68 @@ export default function RoadmapPage() {
                 </p>
             </div>
 
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] items-start gap-3.5">
-                {COLUMNS.map((col) => (
-                    <div key={col.title} className="flex flex-col gap-2.5">
-                        <span
-                            className="flex items-center gap-2 text-xs font-bold uppercase tracking-[1.5px]"
-                            style={{ color: col.color }}
-                        >
+            {empty ? (
+                <div className="rounded-md bg-[#1B1B26] px-5 py-10 text-center text-sm font-semibold text-white/50">
+                    La roadmap est momentanément indisponible. Réessaie dans quelques
+                    minutes.
+                </div>
+            ) : (
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] items-start gap-3.5">
+                    {columns.map((col) => (
+                        <div key={col.id} className="flex flex-col gap-2.5">
                             <span
-                                className="h-2 w-2 rounded-full"
-                                style={{ backgroundColor: col.color }}
-                            />
-                            {col.title}
-                            <span className="font-bold text-white/30">
-                                {col.items.length}
+                                className="flex items-center gap-2 text-xs font-bold uppercase tracking-[1.5px]"
+                                style={{ color: col.color }}
+                            >
+                                <span
+                                    className="h-2 w-2 rounded-full"
+                                    style={{ backgroundColor: col.color }}
+                                />
+                                {col.title}
+                                <span className="font-bold text-white/30">
+                                    {col.items.length}
+                                </span>
                             </span>
-                        </span>
 
-                        {col.items.map((it) => {
-                            const tag = TAGS[it.tag];
-                            return (
-                                <div
-                                    key={it.title}
-                                    className="flex flex-col gap-2 rounded-lg bg-[#1B1B26] px-[18px] py-4"
-                                >
-                                    <div className="flex items-center justify-between gap-2.5">
-                                        <span
-                                            className="rounded-[20px] px-[9px] py-[3px] text-[10px] font-black uppercase tracking-[1px]"
-                                            style={{ color: tag.color, backgroundColor: tag.bg }}
-                                        >
-                                            {tag.label}
+                            {col.items.map((it) => {
+                                const tag = TAGS[it.tag];
+                                return (
+                                    <div
+                                        key={it.title}
+                                        className="flex flex-col gap-2 rounded-lg bg-[#1B1B26] px-[18px] py-4"
+                                    >
+                                        <div className="flex items-center justify-between gap-2.5">
+                                            <span
+                                                className="rounded-[20px] px-[9px] py-[3px] text-[10px] font-black uppercase tracking-[1px]"
+                                                style={{ color: tag.color, backgroundColor: tag.bg }}
+                                            >
+                                                {tag.label}
+                                            </span>
+                                            <span className="text-[11px] font-bold text-white/35">
+                                                {col.eta}
+                                            </span>
+                                        </div>
+                                        <span className="text-[15px] font-bold leading-[1.3]">
+                                            {it.title}
                                         </span>
-                                        <span className="text-[11px] font-bold text-white/35">
-                                            {it.eta}
-                                        </span>
+                                        {it.desc && (
+                                            <span className="text-[13px] font-semibold leading-[1.5] text-white/50">
+                                                {it.desc}
+                                            </span>
+                                        )}
                                     </div>
-                                    <span className="text-[15px] font-bold leading-[1.3]">
-                                        {it.title}
-                                    </span>
-                                    <span className="text-[13px] font-semibold leading-[1.5] text-white/50">
-                                        {it.desc}
-                                    </span>
+                                );
+                            })}
+
+                            {col.items.length === 0 && (
+                                <div className="rounded-lg border border-dashed border-white/10 px-[18px] py-5 text-center text-[13px] font-semibold text-white/30">
+                                    Rien ici pour l&apos;instant
                                 </div>
-                            );
-                        })}
-                    </div>
-                ))}
-            </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            )}
         </main>
     );
 }

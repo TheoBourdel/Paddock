@@ -33,10 +33,24 @@ export default function RootLayout({
                     {children}
                 </div>
 
-                <footer className="border-t border-white/[0.08] px-6 py-[18px] text-center text-xs font-semibold text-white/35">
-                    PADDOCK — Données jolpica-f1 · Photos Wikimedia Commons
+                <footer className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t border-white/[0.08] px-6 py-[18px] text-center text-xs font-semibold text-white/35">
+                    <span>
+                        PADDOCK — Projet de fan non affilié à la Formule 1 · Données
+                        jolpica-f1
+                    </span>
+                    <span className="hidden sm:inline" aria-hidden="true">
+                        ·
+                    </span>
+
+                    <a href="https://buymeacoffee.com/theobrdl"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-bold text-white/50 transition-colors hover:text-[#FF3B33]"
+                    >
+                        ☕ Offrir un café
+                    </a>
                 </footer>
             </body>
-        </html>
+        </html >
     );
 }
